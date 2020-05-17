@@ -1,0 +1,89 @@
+name: Build, Test & Deploy
+# This workflow is triggered on pushes to the repository.
+on: [push]
+
+jobs:
+  lint:
+    name: Run PEP8 Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: autopep8
+        uses: peter-evans/autopep8@v1
+        with:
+          args: --exit-code --recursive --in-place --aggressive --aggressive .
+      - name: commit autopep8 changes
+        if: steps.autopep8.outputs.exit-code == 2
+        run: |
+          git config --global user.name 'Brody Bruin'
+          git config --global user.email 'brody-bruin@mail.bjucps.dev'
+          git commit -am "conforming code to pep8 standard"
+          git push
+  test:
+    needs: lint
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: atc
+        ports:
+        - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - run: sudo apt-get install python-dev libpq-dev
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - run: python manage.py migrate
+        env:
+          DBHOST: 127.0.0.1
+          DBPORT: 5432
+          DBNAME: atc
+          PGUSER: postgres
+          PGPASS: postgres
+      - run: python manage.py test
+        env:
+          DBHOST: 127.0.0.1
+          DBPORT: 5432
+          DBNAME: atc
+          PGUSER: postgres
+          PGPASS: postgres
+  analyze:
+    needs: test
+    name: Run SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  build:
+    needs: analyze
+    name: Build Docker Container
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: kciter/aws-ecr-action@master
+        with:
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          repo: 199061610780.dkr.ecr.us-east-1.amazonaws.com/todo
+          region: us-east-1
+          tags: latest,${{ github.sha }}
+  
+  
+  
