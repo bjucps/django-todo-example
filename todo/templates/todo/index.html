@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="float-right">
+        <a href="{% url 'todo_create' %}" class="btn btn-success">New Todo</a>
+    </div>
+    <div class="clearfix"></div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Edit</th>
+                <th>Description</th>
+                <th>Done</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for todo in object_list %}
+                <tr>
+                    <td><a href="{% url 'todo_edit' todo.id %}" class="btn btn-primary">Edit</a></td>
+                    <td>{{ todo.description }}</td>
+                    <td>{{ todo.done }}</td>
+                    <td><a href="{% url 'todo_delete' todo.id %}" class="btn btn-danger">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
