@@ -78,6 +78,18 @@ jobs:
     docker:
       - image: circleci/python:3.8.3
     steps:
+      - setup_remote_docker
+
+      - run:
+          name: create AWS env vars
+          command: |
+            echo 'export AWS_ACCESS_KEY_ID="AKIAS4WH7EEOIU36RJPO"' >> $BASH_ENV
+            echo 'export AWS_SECRET_ACCESS_KEY="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"' >> $BASH_ENV
+            echo 'export AWS_DEFAULT_REGION="us-east-1"' >> $BASH_ENV
+
+      - aws-cli/setup:
+          profile-name: default
+          
       - run:
           name: docker push
           command: |
