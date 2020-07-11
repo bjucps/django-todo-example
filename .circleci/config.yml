@@ -1,0 +1,100 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2.1
+orbs:
+  aws-cli: circleci/aws-cli@0.1.16
+  sonarcloud: sonarsource/sonarcloud@1.0.1
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.8.3
+      - image: postgres:11
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: todo
+
+    working_directory: ~/repo
+
+    steps:
+      - setup_remote_docker
+
+      - run:
+          name: create AWS env vars
+          command: |
+            echo 'export AWS_ACCESS_KEY_ID="AKIAS4WH7EEOIU36RJPO"' >> $BASH_ENV
+            echo 'export AWS_SECRET_ACCESS_KEY="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"' >> $BASH_ENV
+            echo 'export AWS_DEFAULT_REGION="us-east-1"' >> $BASH_ENV
+
+      - aws-cli/setup:
+          profile-name: default
+
+      - checkout
+
+      - run:
+          name: reset repo to HEAD
+          command: |
+            git reset --hard "$CIRCLE_SHA1"
+            git checkout -q -B "$CIRCLE_BRANCH"
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            export DBHOST=localhost
+            export DBPORT=5432
+            export DBNAME=todo
+            export PGUSER=postgres
+            export PGPASS=postgres
+            python manage.py test
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+    
+      - sonarcloud/scan
+  deploy:
+    docker:
+      - image: circleci/python:3.8.3
+    steps:
+      - run:
+          name: docker push
+          command: |
+            docker build . -t atc
+            if [[ -z "${CIRCLE_PULL_REQUEST}" ]]; then
+              docker tag atc 199061610780.dkr.ecr.us-east-1.amazonaws.com/todo-example:$CIRCLE_BUILD_NUM
+              $(aws ecr get-login)
+              docker push 199061610780.dkr.ecr.us-east-1.amazonaws.com/todo-example:$CIRCLE_BUILD_NUM
+            fi
+
+workflows:
+  main:
+    jobs:
+      - build:
+          context: SonarCloud
+      - deploy:
+          requires: build
+          filters:
+            branches:
+              only: master
