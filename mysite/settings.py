@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'todo.apps.TodoConfig',
     'crispy_forms',
+    'django_nose',
+    'django_prometheus',
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,10 +52,26 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 ROOT_URLCONF = 'mysite.urls'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = [
+    '--with-xunit',
+    '--xunit-file=test-reports/nosetests.xml',
+    '--with-coverage',
+    '--cover-erase',
+    '--cover-xml',
+    '--cover-xml-file=test-reports/nosecover.xml',
+    '--cover-package=todo'
+]
+
+#sentry_sdk.init(
+#    dsn="https://<key>@sentry.bjucps.dev/<project>",
+#    integrations=[DjangoIntegration()]
+#)
 
 TEMPLATES = [
     {
@@ -78,7 +97,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
         'NAME': os.getenv("DBNAME", "todo"),
         'HOST': os.getenv("DBHOST", "localhost"),
         'PORT': os.getenv("DBPORT", "5432"),
