@@ -68,10 +68,10 @@ NOSE_ARGS = [
     '--cover-package=todo'
 ]
 
-#sentry_sdk.init(
+# sentry_sdk.init(
 #    dsn="https://<key>@sentry.bjucps.dev/<project>",
 #    integrations=[DjangoIntegration()]
-#)
+# )
 
 TEMPLATES = [
     {
