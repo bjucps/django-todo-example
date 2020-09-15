@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
