@@ -4,12 +4,12 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('airport', views.TodoList.as_view(),
+    path('todo', views.TodoList.as_view(),
          name='todo_index'),
-    path('airport/new', views.TodoCreate.as_view(),
+    path('todo/new', views.TodoCreate.as_view(),
          name='todo_create'),
-    path('airport/<int:pk>/edit', views.TodoUpdate.as_view(),
+    path('todo/<int:pk>/edit', views.TodoUpdate.as_view(),
          name='todo_edit'),
-    path('airport/<int:pk>/delete', views.TodoDelete.as_view(),
+    path('todo/<int:pk>/delete', views.TodoDelete.as_view(),
          name='todo_delete'),
 ]

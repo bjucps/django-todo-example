@@ -67,7 +67,8 @@ NOSE_ARGS = [
     '--cover-erase',
     '--cover-xml',
     '--cover-xml-file=test-reports/nosecover.xml',
-    '--cover-package=todo'
+    '--cover-package=todo',
+    '--verbosity=3'
 ]
 
 # sentry_sdk.init(

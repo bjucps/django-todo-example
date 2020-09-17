@@ -3,7 +3,6 @@ omit =
     todo/__init__.py
     todo/admin.py
     todo/apps.py
-    todo/models.py
     todo/migrations/*
 
 [report]
@@ -11,5 +10,4 @@ omit =
     todo/__init__.py
     todo/admin.py
     todo/apps.py
-    todo/models.py
     todo/migrations/*
