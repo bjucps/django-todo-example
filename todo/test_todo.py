@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from todo.models import Todo
 import mock
 
+
 class FakeNow:
     def __init__(self, day):
         self.day = day
