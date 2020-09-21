@@ -7,6 +7,7 @@ import mock
 THURSDAY = 3
 FRIDAY = 4
 
+
 class FakeNow:
     def __init__(self, day):
         self.day = day
