@@ -60,12 +60,6 @@ jobs:
           DBNAME: atc
           PGUSER: postgres
           PGPASS: postgres
-  analyze:
-    needs: test
-    name: Run SonarQube
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
       - uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
