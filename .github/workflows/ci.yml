@@ -60,6 +60,11 @@ jobs:
           DBNAME: atc
           PGUSER: postgres
           PGPASS: postgres
+      - name: fix code coverage paths
+        working-directory: ./test-reports
+        run: |
+          sed -i 's;/home/runner/work/django-todo-example/django-todo-example;/github/workspace;g' nosecover.xml
+          sed -i 's;/home/runner/work/django-todo-example/django-todo-example;/github/workspace;g' nosetests.xml
       - uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
