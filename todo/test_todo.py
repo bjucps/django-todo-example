@@ -4,6 +4,9 @@ from todo.models import Todo
 import mock
 
 
+THURSDAY = 3
+FRIDAY = 4
+
 class FakeNow:
     def __init__(self, day):
         self.day = day
@@ -12,12 +15,8 @@ class FakeNow:
         return self.day
 
 
-def fake_datetime_not_friday():
-    return FakeNow(3)
-
-
-def fake_datetime_friday():
-    return FakeNow(4)
+def fake_datetime(day: int):
+    return lambda: FakeNow(day)
 
 
 # sample unit tests
@@ -26,7 +25,7 @@ class TodoUnitTestCases(TestCase):
     def test_completed_not_friday(self, mock_datetime):
         todo = Todo(done=False, description="a simple test")
         self.assertEqual(todo.done, False)
-        mock_datetime.now.side_effect = fake_datetime_not_friday
+        mock_datetime.now.side_effect = fake_datetime(THURSDAY)
         todo.markCompleted()
         self.assertEqual(todo.done, True)
 
@@ -34,7 +33,7 @@ class TodoUnitTestCases(TestCase):
     def test_completed_friday(self, mock_datetime):
         todo = Todo(done=False, description="a simple test")
         self.assertEqual(todo.done, False)
-        mock_datetime.now.side_effect = fake_datetime_friday
+        mock_datetime.now.side_effect = fake_datetime(FRIDAY)
         todo.markCompleted()
         self.assertEqual(todo.done, False)
 
